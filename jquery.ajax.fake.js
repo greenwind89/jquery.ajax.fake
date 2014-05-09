@@ -55,7 +55,6 @@
         options.complete.apply(options.context || this, [data] );
         // options.complete( data );
       }
-      console.log('DATA', data);
       deferred.resolve.apply(options.context || this, [data] );
       
     }, options.wait);
