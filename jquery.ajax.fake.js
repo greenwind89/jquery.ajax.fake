@@ -20,7 +20,11 @@
     , wait  : 1000  // how long should wait before return ajax response 
   }
   
-  , ajaxFake = function(options) {
+  , ajaxFake = function(url, options) {
+    if(options === void 0) {
+        options = url;
+        url = options.url;
+    }
 
     // Create a new deferred object for each request
     var deferred = $.Deferred();
@@ -30,27 +34,29 @@
       return ajax.apply(this, arguments);
     }
     
-    if( !options.fake ) {
+    if( !options.fake || !fakeWebServices[url]) {
       return ajax.apply(this, arguments);
     }
     
     options = $.extend(defaults, options);
     
-    if( !fakeWebServices[options.url] ) {
-      $.error('{url} 404 not found'.replace(/{url}/, options.url));
-      return deferred.reject('404');
-    }
+    // if( !fakeWebServices[url] ) {
+    //   $.error('{url} 404 not found'.replace(/{url}/, url));
+    //   return deferred.reject('404');
+    // }
 
     // fake it..
     setTimeout(function() {
-      var data = fakeWebServices[options.url](options.data);
+      var data = fakeWebServices[url](options.data);
       if(options.success) {
-        options.success( data );
+        options.success.apply(options.context || this, [data] );
       }
       if(options.complete) {
-        options.complete( data );
+        options.complete.apply(options.context || this, [data] );
+        // options.complete( data );
       }
-      deferred.resolve( data );
+      console.log('DATA', data);
+      deferred.resolve.apply(options.context || this, [data] );
       
     }, options.wait);
     
